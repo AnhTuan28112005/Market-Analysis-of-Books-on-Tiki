@@ -1,0 +1,26 @@
+# Thu thập và Trực quan hóa dữ liệu Sách Tiki
+# Lab 01 - VNU-HCMUS
+
+# == Thu thập dữ liệu ==
+requests==2.31.0
+tqdm==4.66.1
+
+# == Xử lý dữ liệu ==
+pandas==2.1.4
+numpy==1.26.3
+openpyxl==3.1.2
+
+# == Trực quan hóa ==
+matplotlib==3.8.2
+seaborn==0.13.1
+plotly==5.18.0
+
+# == Dashboard ==
+streamlit==1.30.0
+
+# == Machine Learning (Tab 3 Dashboard) ==
+scikit-learn==1.4.0
+
+# == Jupyter ==
+notebook==7.0.6
+nbformat==5.9.2
