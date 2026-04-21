@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 from tabs.tab1 import render_tab1
 from tabs.tab2 import render_tab2
 from tabs.tab3 import render_tab3
@@ -58,8 +59,10 @@ st.markdown("""
 # 1. Đọc dữ liệu sách (Từ file clean bạn vừa làm)
 @st.cache_data
 def load_data():
-    # Kiểm tra đường dẫn chính xác (lên 1 cấp thư mục, vào data/processed)
-    df = pd.read_csv('../data/processed/tiki_books_clean.csv')
+    # Sử dụng os.path để tạo đường dẫn tuyệt đối ổn định dù chạy từ thư mục nào
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(base_dir, '..', 'data', 'processed', 'tiki_books_clean.csv')
+    df = pd.read_csv(file_path)
     return df
 
 try:
