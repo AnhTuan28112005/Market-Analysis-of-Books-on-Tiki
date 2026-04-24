@@ -40,27 +40,39 @@ def render_tab2(df):
         st.caption("Biểu đồ Cột: Chỉ ra mức chiết khấu nào mang lại mức doanh số bán trung bình ấn tượng nhất.")
 
     with row1_col2:
-        st.subheader("Hàng 'Sale Sốc' có kém chất lượng?")
+        st.subheader("Cấu trúc Doanh số: Giá và Chiết khấu")
         
-        # LỌC QUAN TRỌNG: Chỉ lấy sách đã có người đánh giá (Tránh nhiễu điểm 0)
-        df_rating = df[df['review_count'] > 0].copy()
+        # Phân nhóm mức giá
+        _, bins_price = pd.qcut(df['price'], q=4, retbins=True)
+        labels_price = [
+            f"Giá rẻ (< {bins_price[1]/1000:,.0f}k)",
+            f"Phổ thông ({bins_price[1]/1000:,.0f}k - {bins_price[2]/1000:,.0f}k)",
+            f"Trung cấp ({bins_price[2]/1000:,.0f}k - {bins_price[3]/1000:,.0f}k)",
+            f"Cao cấp (> {bins_price[3]/1000:,.0f}k)"
+        ]
+        df['price_tier'] = pd.cut(df['price'], bins=bins_price, labels=labels_price, include_lowest=True)
         
-        fig6 = px.scatter(
-            df_rating,
-            x='discount_rate',
-            y='rating_average',
-            trendline='ols', # Đường xu hướng hồi quy tuyến tính
-            trendline_color_override="red",
-            opacity=0.3, # Làm mờ các điểm để dễ nhìn đường line
-            color_discrete_sequence=['#1f77b4'],
-            labels={'discount_rate': 'Tỷ lệ Giảm giá (%)', 'rating_average': 'Điểm Đánh giá (Rating)'}
+        # Phân nhóm Chiết khấu
+        bins_disc = [-1, 0, 20, 40, 100]
+        labels_disc = ['Nguyên giá (0%)', 'Giảm nhẹ (1-20%)', 'Giảm vừa (21-40%)', 'Giảm sâu (>40%)']
+        df['discount_tier'] = pd.cut(df['discount_rate'], bins=bins_disc, labels=labels_disc, include_lowest=True)
+        
+        df_sun = df.dropna(subset=['price_tier', 'discount_tier', 'quantity_sold'])
+        
+        #  Vẽ Sunburst Chart
+        fig6 = px.sunburst(
+            df_sun,
+            path=['price_tier', 'discount_tier'],
+            values='quantity_sold',              
+            color='rating_average',               
+            color_continuous_scale='RdBu',    
+            color_continuous_midpoint=4.5,       
+            labels={'price_tier': 'Phân khúc Giá', 'discount_tier': 'Mức Giảm', 'rating_average': 'Rating'}
         )
         fig6.update_layout(margin=dict(t=0, l=0, r=0, b=0))
-        st.plotly_chart(fig6, use_container_width=True)
-        st.caption("Scatter Plot với Đường R-Line (đỏ): Phân tích xem có phải nhà bán thường xuyên xả hàng giảm giá là sản phẩm kém chất lượng (Rating thấp) hay không?")
-
-    st.markdown("---")
-
+        
+        st.plotly_chart(fig6, width='stretch')
+        st.caption("Sunburst Chart: Phân khúc giá kết hợp với chiến lược giảm giá nào đang tạo ra doanh số (diện tích) lớn nhất và sự hài lòng (màu sắc xanh) cao nhất?")
     # ==========================================
     # KHỐI 2: ROW 2 (Tương quan & Tiềm năng ẩn)
     # ==========================================
@@ -69,11 +81,10 @@ def render_tab2(df):
     with row2_col1:
         st.subheader("Ma trận Tương quan Đa biến")
         
-        # Tính toán ma trận tương quan Spearman (chống outlier tốt hơn Pearson)
+        # Tính toán ma trận tương quan Spearman 
         corr_cols = ['price', 'discount_rate', 'rating_average', 'review_count', 'image_count', 'quantity_sold']
         corr_matrix = df[corr_cols].corr(method='spearman')
         
-        # Format tên cột cho đẹp
         corr_matrix.columns = ['Giá', 'Giảm giá', 'Rating', 'Review', 'Số hình ảnh', 'Doanh số']
         corr_matrix.index = corr_matrix.columns
         

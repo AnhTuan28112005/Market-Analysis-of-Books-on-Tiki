@@ -124,44 +124,32 @@ def render_tab3(df):
     row2_col1, row2_col2 = st.columns(2)
 
     with row2_col1:
-        st.subheader("Giá trị của việc đầu tư Hình ảnh")
+        st.subheader("Tương quan Hình ảnh và Doanh số theo Loại người bán")
         
-        # 1. Gom nhóm (Binning) lượng hình ảnh thành các bậc trải nghiệm
-        def group_image(x):
-            if x <= 1: return '1 ảnh (Cơ bản)'
-            elif x <= 3: return '2-3 ảnh (Đầy đủ)'
-            elif x <= 5: return '4-5 ảnh (Chi tiết)'
-            else: return '6+ ảnh (Chuyên nghiệp)'
-            
-        df['image_group'] = df['image_count'].apply(group_image)
+        # 1. Nhóm số lượng ảnh 
+        bins = [0, 1, 3, 5, 100]
+        labels = ['1 ảnh', '2-3 ảnh', '4-5 ảnh', '6+ ảnh']
+        df['image_grp'] = pd.cut(df['image_count'], bins=bins, labels=labels)
         
-        # Đảm bảo thứ tự hiển thị đúng logic từ ít đến nhiều
-        order = ['1 ảnh (Cơ bản)', '2-3 ảnh (Đầy đủ)', '4-5 ảnh (Chi tiết)', '6+ ảnh (Chuyên nghiệp)']
+        # 2. Tạo bảng phân tích chéo, tính trung vị doanh số
+        heatmap_data = df.pivot_table(
+            index='seller_type', 
+            columns='image_grp', 
+            values='quantity_sold', 
+            aggfunc='median'
+        ).fillna(0)
         
-        # 2. Tính toán Doanh số trung vị
-        img_stats = df.groupby('image_group')['quantity_sold'].median().reset_index()
-        img_stats['image_group'] = pd.Categorical(img_stats['image_group'], categories=order, ordered=True)
-        img_stats = img_stats.sort_values('image_group')
-        
-        # Chuẩn bị danh sách màu: Cột "2-3 ảnh" màu xanh đậm nổi bật, các cột còn lại xanh nhạt đồng đều
-        img_stats['Màu nổi bật'] = img_stats['image_group'].apply(
-            lambda x: '#113b7a' if '2-3 ảnh' in str(x) else '#7cb3d6'
+        # 3. Vẽ Heatmap bằng Plotly
+        fig = px.imshow(
+            heatmap_data,
+            text_auto=True,
+            aspect="auto",
+            color_continuous_scale='Viridis',
+            labels=dict(x="Số lượng ảnh", y="Loại người bán", color="Doanh số trung vị")
         )
         
-        # 3. Vẽ biểu đồ Bar Chart
-        fig11 = px.bar(
-            img_stats,
-            x='image_group',
-            y='quantity_sold',
-            text_auto=True, # Hiển thị thẳng con số lên cột
-            color='Màu nổi bật',
-            color_discrete_map="identity", # Ép Plotly đọc mã HEX trực tiếp
-            labels={'image_group': 'Mức độ đầu tư Hình ảnh', 'quantity_sold': 'Doanh số Trung vị'}
-        )
-        fig11.update_traces(textposition='outside')
-        fig11.update_layout(margin=dict(t=0, l=0, r=0, b=0))
-        st.plotly_chart(fig11, use_container_width=True)
-        st.caption("Biểu đồ Cột (Binning): Trả lời chính xác câu hỏi 'Nếu tôi bổ sung thêm hình ảnh, doanh số chốt đơn sẽ tăng trưởng bao nhiêu %?'")
+        st.plotly_chart(fig, use_container_width=True)
+        st.caption("Heatmap: Việc đầu tư nhiều hình ảnh có mang lại hiệu ứng tăng doanh số đồng đều giữa Tiki Trading và Merchant không?")
 
     with row2_col2:
         st.subheader("Trí tuệ Nhân tạo: Yếu tố Quyết định Doanh số")
