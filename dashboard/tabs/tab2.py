@@ -4,8 +4,42 @@ import pandas as pd
 import numpy as np
 
 def render_tab2(df):
-    st.markdown("## 📈 Động lực Doanh số & Hiệu quả Marketing")
-    st.markdown("*Đi sâu phân tích hành vi mua sắm: Sự tác động của mức Giảm giá đến Doanh thu và góc độ Chất lượng sản phẩm thực tế.*")
+    # Custom styled header
+    st.markdown("""
+    <style>
+        .custom-header {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0066FF;
+            padding: 10px 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 102, 255, 0.15);
+        }
+        .custom-subheader {
+            font-size: 1.8rem;
+            font-weight: 750;
+            color: #00A699;
+            margin: 28px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #00A699;
+            display: inline-block;
+            letter-spacing: -0.3px;
+        }
+        .kpi-description {
+            font-size: 1.05rem;
+            color: #555555;
+            font-style: italic;
+            margin: 8px 0 20px 0;
+            line-height: 1.6;
+            letter-spacing: -0.2px;
+        }
+    </style>
+    <div class="custom-header">📈 Động lực Doanh số & Hiệu quả Marketing</div>
+    <div class="kpi-description">
+    💡 Đi sâu phân tích hành vi mua sắm: Sự tác động của mức Giảm giá đến Doanh thu và góc độ Chất lượng sản phẩm thực tế.
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
 
@@ -15,7 +49,7 @@ def render_tab2(df):
     row1_col1, row1_col2 = st.columns(2)
 
     with row1_col1:
-        st.subheader("Ngưỡng Giảm giá 'Vàng' thu hút khách")
+        st.markdown('<div class="custom-subheader">Ngưỡng Giảm giá \'Vàng\' thu hút khách</div>', unsafe_allow_html=True)
         
         # Chia khoảng (binning) cho cột discount
         bins = [0, 10, 20, 30, 40, 50, 60, 100]
@@ -40,7 +74,7 @@ def render_tab2(df):
         st.caption("Biểu đồ Cột: Chỉ ra mức chiết khấu nào mang lại mức doanh số bán trung bình ấn tượng nhất.")
 
     with row1_col2:
-        st.subheader("Hàng 'Sale Sốc' có kém chất lượng?")
+        st.markdown('<div class="custom-subheader">Hàng \'Sale Sốc\' có kém chất lượng?</div>', unsafe_allow_html=True)
         
         # LỌC QUAN TRỌNG: Chỉ lấy sách đã có người đánh giá (Tránh nhiễu điểm 0)
         df_rating = df[df['review_count'] > 0].copy()
@@ -67,7 +101,7 @@ def render_tab2(df):
     row2_col1, row2_col2 = st.columns(2)
 
     with row2_col1:
-        st.subheader("Ma trận Tương quan Đa biến")
+        st.markdown('<div class="custom-subheader">Ma trận Tương quan Đa biến</div>', unsafe_allow_html=True)
         
         # Tính toán ma trận tương quan Spearman (chống outlier tốt hơn Pearson)
         corr_cols = ['price', 'discount_rate', 'rating_average', 'review_count', 'image_count', 'quantity_sold']
@@ -89,7 +123,7 @@ def render_tab2(df):
         st.caption("Heatmap: Cho biết giữa số lượng Review, mức độ Giảm giá và điểm Rating, đâu mới là động lực thúc đẩy Sale mạnh nhất.")
 
     with row2_col2:
-        st.subheader("Truy tìm Sách 'Tiềm Năng Ẩn'")
+        st.markdown('<div class="custom-subheader">Truy tìm Sách \'Tiềm Năng Ẩn\'</div>', unsafe_allow_html=True)
         
         # Thuật toán tìm Tiềm Năng Ẩn đã được tinh chỉnh
         # Sales rất cao (Top 15%) nhưng Review dưới mức trung bình (Bottom 50%)

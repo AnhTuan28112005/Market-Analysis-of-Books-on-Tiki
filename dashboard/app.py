@@ -56,7 +56,7 @@ st.markdown("""
         padding: 20px;
         color: #0066FF;
         letter-spacing: -0.5px;
-        animation: fadeInUp 0.6s ease-out;
+        animation: fadeInUp 0.4s ease-out;
     }
     
     .title-center::before {
@@ -81,31 +81,33 @@ st.markdown("""
         flex: 1 !important;
         text-align: center !important;
         font-size: 15px !important;
-        font-weight: 600 !important;
-        padding: 12px 16px !important;
-        border-radius: 8px !important;
+        font-weight: 700 !important;
+        padding: 14px 18px !important;
+        border-radius: 10px !important;
         border: none !important;
-        background-color: white !important;
-        color: #666666 !important;
+        background-color: #F0F4FF !important;
+        color: #555555 !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        margin: 0 4px !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+        margin: 0 6px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+        letter-spacing: -0.3px !important;
     }
     
     /* Hover effect cho tab */
     button[data-baseweb="tab"]:hover {
-        background-color: #E8F0FF !important;
+        background-color: #E0E8FF !important;
         color: #0066FF !important;
-        box-shadow: 0 2px 6px rgba(0, 102, 255, 0.15) !important;
-        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(0, 102, 255, 0.2) !important;
+        transform: translateY(-2px) !important;
     }
     
     /* Tab active (selected) */
     button[data-baseweb="tab"][aria-selected="true"] {
         background: linear-gradient(135deg, #0066FF 0%, #00A699 100%) !important;
         color: white !important;
-        box-shadow: var(--shadow-md) !important;
-        transform: translateY(0) !important;
+        box-shadow: 0 6px 16px rgba(0, 102, 255, 0.3) !important;
+        transform: translateY(-2px) !important;
+        font-weight: 800 !important;
     }
 
     /* Căn giữa các tiêu đề H2 (Tên của từng Tab) và H3 (Tiêu đề biểu đồ) */
@@ -117,16 +119,21 @@ st.markdown("""
     }
     
     h2 {
-        font-size: 1.8rem !important;
+        font-size: 2.2rem !important;
         margin-top: 35px !important;
         margin-bottom: 12px !important;
         color: #0066FF !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.5px !important;
+        text-shadow: 0 2px 4px rgba(0, 102, 255, 0.15) !important;
     }
     
     h3 {
-        font-size: 1.3rem !important;
-        color: #1A1A1A !important;
+        font-size: 1.5rem !important;
+        color: #00A699 !important;
         margin-top: 25px !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.3px !important;
     }
     
     /* Căn giữa văn bản diễn giải in nghiêng dưới H2 */
@@ -143,25 +150,43 @@ st.markdown("""
     /* Căn giữa toàn bộ khối Số liệu KPI (st.metric) */
     [data-testid="stMetric"] {
         background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%) !important;
-        padding: 24px 18px !important;
-        border-radius: 12px !important;
-        border-left: 4px solid #0066FF !important;
+        padding: 28px 20px !important;
+        border-radius: 14px !important;
+        border: none !important;
+        border-top: 4px solid #0066FF !important;
         text-align: center !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 14px !important;
-        box-shadow: var(--shadow-sm) !important;
-        transition: all 0.3s ease !important;
+        gap: 12px !important;
+        box-shadow: 0 4px 15px rgba(0, 102, 255, 0.12) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         animation: fadeInUp 0.5s ease-out !important;
+    }
+    
+    /* Màu border khác nhau cho mỗi metric (dùng nth-child) */
+    [data-testid="stMetric"]:nth-child(1) {
+        border-top-color: #0066FF !important;
+    }
+    
+    [data-testid="stMetric"]:nth-child(2) {
+        border-top-color: #00A699 !important;
+    }
+    
+    [data-testid="stMetric"]:nth-child(3) {
+        border-top-color: #FF7A45 !important;
+    }
+    
+    [data-testid="stMetric"]:nth-child(4) {
+        border-top-color: #FFB800 !important;
     }
     
     /* Hover effect metrics */
     [data-testid="stMetric"]:hover {
-        box-shadow: var(--shadow-md) !important;
-        transform: translateY(-2px) !important;
-        border-left-color: #00A699 !important;
+        box-shadow: 0 6px 20px rgba(0, 102, 255, 0.18) !important;
+        transform: translateY(-3px) !important;
+        background: linear-gradient(135deg, #FFFFFF 0%, #F0F4FF 100%) !important;
     }
     
     /* Label styling */
@@ -174,12 +199,13 @@ st.markdown("""
     }
     
     [data-testid="stMetricLabel"] > div {
-        color: #666666 !important;
-        font-size: 0.95rem !important;
+        color: #555555 !important;
+        font-size: 1.05rem !important;
         width: 100% !important;
         text-align: center !important;
-        line-height: 1.5 !important;
-        font-weight: 500 !important;
+        line-height: 1.6 !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.2px !important;
     }
     
     /* Value styling */
@@ -193,12 +219,29 @@ st.markdown("""
     
     [data-testid="stMetricValue"] > div {
         color: #0066FF !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
+        font-size: 2rem !important;
+        font-weight: 800 !important;
         width: 100% !important;
         text-align: center !important;
-        line-height: 1.3 !important;
-        letter-spacing: -0.3px !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.5px !important;
+    }
+    
+    /* Màu khác nhau cho mỗi metric value */
+    [data-testid="stMetric"]:nth-child(1) [data-testid="stMetricValue"] > div {
+        color: #0066FF !important;  /* Blue - Tổng số */
+    }
+    
+    [data-testid="stMetric"]:nth-child(2) [data-testid="stMetricValue"] > div {
+        color: #00A699 !important;  /* Teal - Doanh số */
+    }
+    
+    [data-testid="stMetric"]:nth-child(3) [data-testid="stMetricValue"] > div {
+        color: #FF7A45 !important;  /* Orange - Giá */
+    }
+    
+    [data-testid="stMetric"]:nth-child(4) [data-testid="stMetricValue"] > div {
+        color: #FFB800 !important;  /* Gold - Rating */
     }
     
     /* Delta styling */
@@ -267,16 +310,15 @@ st.markdown("""
     
     /* ========== INPUT LABELS ========== */
     [data-testid="stSidebar"] label {
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         color: #0066FF !important;
-        font-size: 0.88rem !important;
-        margin-bottom: 10px !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 12px !important;
         display: block !important;
-        line-height: 1.3 !important;
-        letter-spacing: -0.3px !important;
-        text-transform: uppercase !important;
-        font-size: 0.75rem !important;
-        padding-bottom: 8px !important;
+        line-height: 1.4 !important;
+        letter-spacing: -0.2px !important;
+        text-transform: none !important;
+        padding-bottom: 6px !important;
         border-bottom: 1px solid #E8EDF5 !important;
     }
     
@@ -361,39 +403,24 @@ st.markdown("""
     
     /* Multiselect tags (pills) */
     [data-testid="stMultiSelect"] [data-baseweb="tag"] {
-        background-color: #E8F0FF !important;
-        color: #0066FF !important;
-        border-radius: 6px !important;
-        font-weight: 500 !important;
-        padding: 6px 10px !important;
+        background: linear-gradient(135deg, #0066FF 0%, #00A699 100%) !important;
+        color: white !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        padding: 8px 12px !important;
         border: none !important;
-        box-shadow: 0 1px 3px rgba(0, 102, 255, 0.1) !important;
-        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 8px rgba(0, 102, 255, 0.2) !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
     
     [data-testid="stMultiSelect"] [data-baseweb="tag"]:hover {
-        background-color: #D5E8FF !important;
-        box-shadow: 0 2px 6px rgba(0, 102, 255, 0.15) !important;
-    }
-    
-    /* "Tất cả" tag - PRIORITY HIGHLIGHT */
-    [data-testid="stMultiSelect"] [data-baseweb="tag"]:first-child {
-        background: linear-gradient(135deg, #0066FF, #00A699) !important;
-        color: white !important;
-        box-shadow: 0 2px 8px rgba(0, 102, 255, 0.25) !important;
-        font-weight: 600 !important;
-    }
-    
-    [data-testid="stMultiSelect"] [data-baseweb="tag"]:first-child:hover {
-        box-shadow: 0 3px 10px rgba(0, 102, 255, 0.35) !important;
+        background: linear-gradient(135deg, #0052CC 0%, #009080 100%) !important;
+        box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3) !important;
+        transform: translateY(-1px) !important;
     }
     
     /* Close button trên tag */
     [data-testid="stMultiSelect"] [data-baseweb="tag"] svg {
-        color: #0066FF !important;
-    }
-    
-    [data-testid="stMultiSelect"] [data-baseweb="tag"]:first-child svg {
         color: white !important;
     }
     
@@ -521,8 +548,8 @@ st.markdown("""
     /* ========== DIVIDER ========== */
     hr {
         border: none !important;
-        height: 2px !important;
-        background: linear-gradient(90deg, transparent, #E5E7EB, transparent) !important;
+        height: 1px !important;
+        background: #E5E7EB !important;
         margin: 20px 0 !important;
     }
     
@@ -530,8 +557,8 @@ st.markdown("""
     [data-testid="stAlert"] {
         border-radius: 12px !important;
         border-left: 4px solid !important;
-        box-shadow: var(--shadow-sm) !important;
-        animation: slideIn 0.3s ease-out !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+        animation: slideIn 0.25s ease-out !important;
     }
 
 </style>
