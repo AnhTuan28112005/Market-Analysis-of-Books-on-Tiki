@@ -4,6 +4,7 @@ import os
 from tabs.tab1 import render_tab1
 from tabs.tab2 import render_tab2
 from tabs.tab3 import render_tab3
+from tabs.tab4 import render_tab4
 
 # Cấu hình website
 st.set_page_config(page_title="Tiki Book Analytics", page_icon="📚", layout="wide")
@@ -613,6 +614,9 @@ try:
 
         with tab3:
             render_tab3(filtered_df)
+
+        with tab4:
+            render_tab4(filtered_df)
 
 except Exception as e:
     st.error(f"Lỗi khi đọc file dữ liệu: {e}")

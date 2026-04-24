@@ -48,17 +48,32 @@ def render_tab1(df):
         # Biểu đồ 2: Boxplot Phân phối giá
         st.subheader("Phân phối Giá theo Danh mục")
         # Lọc bớt sách vượt quá 1 triệu để boxplot dễ nhìn hơn (có thể điều chỉnh)
-        df_box = df[df['price'] <= 1_000_000]
+        df_box = df[df['price'] <= 1_000_000].copy()
+
+        # Gom các danh mục English nhỏ vào nhóm chung để biểu đồ rõ ràng hơn
+        df_box['category_display'] = df_box['crawl_category'].replace({
+            "English - Children's Books": 'Sách Tiếng Anh',
+            'English - Fiction': 'Sách Tiếng Anh'
+        })
+
+        # Chỉ hiển thị các danh mục có đủ dữ liệu để tránh bảng quá dày
+        top_categories = df_box['category_display'].value_counts().nlargest(6).index
+        df_box = df_box[df_box['category_display'].isin(top_categories)]
+
+        # Sắp xếp danh mục theo giá trung vị để dễ so sánh
+        category_order = df_box.groupby('category_display')['price'].median().sort_values().index
+
         fig2 = px.box(
-            df_box, 
-            x='price', 
-            y='crawl_category', 
-            color='crawl_category',
-            labels={'price': 'Giá bán (VNĐ)', 'crawl_category': 'Thể loại'}
+            df_box,
+            x='price',
+            y='category_display',
+            color='category_display',
+            category_orders={'category_display': category_order},
+            labels={'price': 'Giá bán (VNĐ)', 'category_display': 'Thể loại'}
         )
         fig2.update_layout(showlegend=False, xaxis_title="Giá bán (VNĐ)", yaxis_title="")
         st.plotly_chart(fig2, use_container_width=True)
-        st.caption("Boxplot thể hiện khoảng giá phổ biến (IQR) và các đầu sách ngoại lai (điểm chấm) giá cao.")
+        st.caption("Boxplot thể hiện phân phối giá theo nhóm danh mục chính. Các nhóm English nhỏ được gom chung để biểu đồ dễ đọc hơn.")
 
     st.markdown("---")
 
