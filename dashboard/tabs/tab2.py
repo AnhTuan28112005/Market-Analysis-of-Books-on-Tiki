@@ -1,21 +1,57 @@
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+from scipy.stats import gaussian_kde
 
 def render_tab2(df):
-    st.markdown("## 📈 Động lực Doanh số & Hiệu quả Marketing")
-    st.markdown("*Đi sâu phân tích hành vi mua sắm: Sự tác động của mức Giảm giá đến Doanh thu và góc độ Chất lượng sản phẩm thực tế.*")
+    # Custom styled header
+    st.markdown("""
+    <style>
+        .custom-header {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0066FF;
+            padding: 10px 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 102, 255, 0.15);
+        }
+        .custom-subheader {
+            font-size: 1.8rem;
+            font-weight: 750;
+            color: #00A699;
+            margin: 28px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #00A699;
+            display: inline-block;
+            letter-spacing: -0.3px;
+        }
+        .kpi-description {
+            font-size: 1.05rem;
+            color: #555555;
+            font-style: italic;
+            margin: 8px 0 20px 0;
+            line-height: 1.6;
+            letter-spacing: -0.2px;
+        }
+    </style>
+    <div class="custom-header">📈 Động lực Doanh số & Hiệu quả Marketing</div>
+    <div class="kpi-description">
+    💡 Đi sâu phân tích hành vi mua sắm: Sự tác động của mức Giảm giá đến Doanh thu và góc độ Chất lượng sản phẩm thực tế.
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
 
     # ==========================================
-    # KHỐI 1: ROW 1 (Ngưỡng Giảm giá & Giá vs Chất lượng)
+    # KHỐI 1: ROW 1 (Ngưỡng Giảm giá & Ridge Plot)
     # ==========================================
     row1_col1, row1_col2 = st.columns(2)
 
     with row1_col1:
-        st.subheader("Ngưỡng Giảm giá 'Vàng' thu hút khách")
+        st.markdown('<div class="custom-subheader">Ngưỡng Giảm giá \'Vàng\' thu hút khách</div>', unsafe_allow_html=True)
         
         # Chia khoảng (binning) cho cột discount
         bins = [0, 10, 20, 30, 40, 50, 60, 100]
@@ -40,46 +76,140 @@ def render_tab2(df):
         st.caption("Biểu đồ Cột: Chỉ ra mức chiết khấu nào mang lại mức doanh số bán trung bình ấn tượng nhất.")
 
     with row1_col2:
-        st.subheader("Cấu trúc Doanh số: Giá và Chiết khấu")
+        st.markdown('<div class="custom-subheader">Hình thái Doanh số theo các dải Discount</div>', unsafe_allow_html=True)
         
-        # Phân nhóm mức giá
-        _, bins_price = pd.qcut(df['price'], q=4, retbins=True)
-        labels_price = [
-            f"Giá rẻ (< {bins_price[1]/1000:,.0f}k)",
-            f"Phổ thông ({bins_price[1]/1000:,.0f}k - {bins_price[2]/1000:,.0f}k)",
-            f"Trung cấp ({bins_price[2]/1000:,.0f}k - {bins_price[3]/1000:,.0f}k)",
-            f"Cao cấp (> {bins_price[3]/1000:,.0f}k)"
+        # ====== RIDGE PLOT (Joyplot) ======
+        # Phân lớp theo 8 dải discount
+        ridge_bins = [0, 5, 10, 20, 30, 40, 50, 60, 100]
+        ridge_labels = ['0-5%', '5-10%', '10-20%', '20-30%', '30-40%', '40-50%', '50-60%', '>60%']
+        df['ridge_discount'] = pd.cut(df['discount_rate'], bins=ridge_bins, labels=ridge_labels, include_lowest=True)
+        
+        # Lọc dữ liệu hợp lệ
+        df_ridge = df.dropna(subset=['ridge_discount', 'quantity_sold'])
+        df_ridge = df_ridge[df_ridge['quantity_sold'] > 0].copy()
+        
+        # Log-transform doanh số để KDE mượt hơn (doanh số thường lệch phải rất mạnh)
+        df_ridge['log_sales'] = np.log1p(df_ridge['quantity_sold'])
+        
+        # Gradient màu: từ xanh dương đậm → teal → xanh lá → vàng → cam
+        gradient_colors = [
+            'rgba(0, 51, 153, 0.7)',    # 0-5%   : Navy
+            'rgba(0, 102, 204, 0.7)',    # 5-10%  : Blue
+            'rgba(0, 153, 204, 0.7)',    # 10-20% : Cyan-Blue
+            'rgba(0, 166, 153, 0.7)',    # 20-30% : Teal
+            'rgba(0, 179, 119, 0.7)',    # 30-40% : Green-Teal
+            'rgba(82, 196, 26, 0.7)',    # 40-50% : Green
+            'rgba(255, 170, 0, 0.7)',    # 50-60% : Orange
+            'rgba(255, 85, 0, 0.7)',     # >60%   : Red-Orange
         ]
-        df['price_tier'] = pd.cut(df['price'], bins=bins_price, labels=labels_price, include_lowest=True)
         
-        # Phân nhóm Chiết khấu
-        bins_disc = [-1, 0, 20, 40, 100]
-        labels_disc = ['Nguyên giá (0%)', 'Giảm nhẹ (1-20%)', 'Giảm vừa (21-40%)', 'Giảm sâu (>40%)']
-        df['discount_tier'] = pd.cut(df['discount_rate'], bins=bins_disc, labels=labels_disc, include_lowest=True)
+        line_colors = [
+            'rgba(0, 51, 153, 1)',
+            'rgba(0, 102, 204, 1)',
+            'rgba(0, 153, 204, 1)',
+            'rgba(0, 166, 153, 1)',
+            'rgba(0, 179, 119, 1)',
+            'rgba(82, 196, 26, 1)',
+            'rgba(255, 170, 0, 1)',
+            'rgba(255, 85, 0, 1)',
+        ]
         
-        df_sun = df.dropna(subset=['price_tier', 'discount_tier', 'quantity_sold'])
+        fig6 = go.Figure()
         
-        #  Vẽ Sunburst Chart
-        fig6 = px.sunburst(
-            df_sun,
-            path=['price_tier', 'discount_tier'],
-            values='quantity_sold',              
-            color='rating_average',               
-            color_continuous_scale='RdBu',    
-            color_continuous_midpoint=4.5,       
-            labels={'price_tier': 'Phân khúc Giá', 'discount_tier': 'Mức Giảm', 'rating_average': 'Rating'}
+        # Khoảng x chung cho tất cả KDE
+        x_min = df_ridge['log_sales'].quantile(0.01)
+        x_max = df_ridge['log_sales'].quantile(0.99)
+        x_grid = np.linspace(x_min, x_max, 200)
+        
+        # Khoảng cách giữa các lớp ridge
+        spacing = 0.35
+        
+        # Vẽ từ dưới lên (dải discount cao nhất ở trên)
+        for i, label in enumerate(ridge_labels):
+            subset = df_ridge[df_ridge['ridge_discount'] == label]['log_sales']
+            
+            if len(subset) < 3:
+                # Nếu dải này quá ít dữ liệu, bỏ qua
+                continue
+            
+            try:
+                kde = gaussian_kde(subset, bw_method=0.4)
+                y_kde = kde(x_grid)
+                # Chuẩn hóa KDE để so sánh tương đối giữa các lớp
+                y_kde = y_kde / y_kde.max() * 0.3
+            except Exception:
+                continue
+            
+            offset = i * spacing
+            
+            # Đường viền trên (filled area)
+            fig6.add_trace(go.Scatter(
+                x=x_grid,
+                y=y_kde + offset,
+                mode='lines',
+                line=dict(color=line_colors[i], width=1.5),
+                showlegend=False,
+                hovertemplate=f'<b>Dải {label}</b><br>Mật độ: %{{y:.3f}}<extra></extra>'
+            ))
+            
+            # Đường baseline
+            fig6.add_trace(go.Scatter(
+                x=x_grid,
+                y=[offset] * len(x_grid),
+                mode='lines',
+                line=dict(color='rgba(0,0,0,0)', width=0),
+                showlegend=False,
+                hoverinfo='skip',
+                fill='tonexty',
+                fillcolor=gradient_colors[i]
+            ))
+            
+            # Nhãn dải discount ở bên trái
+            fig6.add_annotation(
+                x=x_min - (x_max - x_min) * 0.02,
+                y=offset + 0.02,
+                text=f'<b>{label}</b>',
+                showarrow=False,
+                font=dict(size=10, color=line_colors[i]),
+                xanchor='right'
+            )
+        
+        # Chuyển trục x từ log về giá trị thực cho dễ đọc
+        tick_values_real = [10, 50, 100, 500, 1000, 5000, 10000]
+        tick_values_log = [np.log1p(v) for v in tick_values_real]
+        tick_labels = [str(v) for v in tick_values_real]
+        
+        fig6.update_layout(
+            xaxis=dict(
+                title='Doanh số bán (quantity_sold)',
+                tickvals=tick_values_log,
+                ticktext=tick_labels,
+                showgrid=False,
+                zeroline=False
+            ),
+            yaxis=dict(
+                showticklabels=False,
+                showgrid=False,
+                zeroline=False,
+                title='Dải Discount (%)',
+                title_font=dict(size=13, color='#555555'),
+                title_standoff=10
+            ),
+            margin=dict(t=10, l=70, r=10, b=40),
+            plot_bgcolor='rgba(248, 250, 252, 1)',
+            paper_bgcolor='rgba(255, 255, 255, 0)',
+            height=420
         )
-        fig6.update_layout(margin=dict(t=0, l=0, r=0, b=0))
         
-        st.plotly_chart(fig6, width='stretch')
-        st.caption("Sunburst Chart: Phân khúc giá kết hợp với chiến lược giảm giá nào đang tạo ra doanh số (diện tích) lớn nhất và sự hài lòng (màu sắc xanh) cao nhất?")
+        st.plotly_chart(fig6, use_container_width=True)
+        st.caption("Ridge Plot (Joyplot): Mỗi lớp sóng thể hiện mật độ phân bố doanh số ở một dải Discount. Đỉnh sóng càng cao và hẹp → doanh số tập trung ổn định. Gradient màu chuyển từ xanh (ít giảm giá) sang cam (giảm sâu).")
     # ==========================================
     # KHỐI 2: ROW 2 (Tương quan & Tiềm năng ẩn)
     # ==========================================
     row2_col1, row2_col2 = st.columns(2)
 
     with row2_col1:
-        st.subheader("Ma trận Tương quan Đa biến")
+        st.markdown('<div class="custom-subheader">Ma trận Tương quan Đa biến</div>', unsafe_allow_html=True)
         
         # Tính toán ma trận tương quan Spearman 
         corr_cols = ['price', 'discount_rate', 'rating_average', 'review_count', 'image_count', 'quantity_sold']
@@ -100,7 +230,7 @@ def render_tab2(df):
         st.caption("Heatmap: Cho biết giữa số lượng Review, mức độ Giảm giá và điểm Rating, đâu mới là động lực thúc đẩy Sale mạnh nhất.")
 
     with row2_col2:
-        st.subheader("Truy tìm Sách 'Tiềm Năng Ẩn'")
+        st.markdown('<div class="custom-subheader">Truy tìm Sách \'Tiềm Năng Ẩn\'</div>', unsafe_allow_html=True)
         
         # Thuật toán tìm Tiềm Năng Ẩn đã được tinh chỉnh
         # Sales rất cao (Top 15%) nhưng Review dưới mức trung bình (Bottom 50%)

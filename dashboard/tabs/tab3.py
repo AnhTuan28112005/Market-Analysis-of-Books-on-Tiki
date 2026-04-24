@@ -35,8 +35,42 @@ def get_feature_importance(df):
     return fi
 
 def render_tab3(df):
-    st.markdown("## 📚 Đặc điểm Sản phẩm & Hệ sinh thái Người bán")
-    st.markdown("*Phân tích đặc điểm vật lý (Bìa, Hình ảnh chất lượng) cùng cuộc chiến giữa đại lý chính hãng (Tiki Trading) và nhà bán hàng bên thứ 3 (Merchant).*")
+    # Custom styled header
+    st.markdown("""
+    <style>
+        .custom-header {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0066FF;
+            padding: 10px 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 102, 255, 0.15);
+        }
+        .custom-subheader {
+            font-size: 1.8rem;
+            font-weight: 750;
+            color: #00A699;
+            margin: 28px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #00A699;
+            display: inline-block;
+            letter-spacing: -0.3px;
+        }
+        .kpi-description {
+            font-size: 1.05rem;
+            color: #555555;
+            font-style: italic;
+            margin: 8px 0 20px 0;
+            line-height: 1.6;
+            letter-spacing: -0.2px;
+        }
+    </style>
+    <div class="custom-header">📚 Đặc điểm Sản phẩm & Hệ sinh thái Người bán</div>
+    <div class="kpi-description">
+    🏢 Phân tích đặc điểm vật lý (Bìa, Hình ảnh chất lượng) cùng cuộc chiến giữa đại lý chính hãng (Tiki Trading) và nhà bán hàng bên thứ 3 (Merchant).
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
 
@@ -46,7 +80,7 @@ def render_tab3(df):
     row1_col1, row1_col2 = st.columns(2)
 
     with row1_col1:
-        st.subheader("Sức mạnh: Tiki Trading vs Merchant")
+        st.markdown('<div class="custom-subheader">Sức mạnh: Tiki Trading vs Merchant</div>', unsafe_allow_html=True)
         # Phân loại seller
         df['seller_group'] = df['seller_name'].apply(lambda x: 'Tiki Trading' if str(x).strip().lower() == 'tiki trading' else 'Merchant')
         
@@ -91,7 +125,7 @@ def render_tab3(df):
         st.caption("Biểu đồ Mạng nhện (Radar Chart): Trực quan hóa 5 'Hệ số sức mạnh' từ trung bình thang 100. Chứng minh liệu Tiki Trading có thực sự áo đảo dân thường ở mọi mặt trận?")
 
     with row1_col2:
-        st.subheader("Thị hiếu Bìa Sách: Cứng vs Mềm")
+        st.markdown('<div class="custom-subheader">Thị hiếu Bìa Sách: Cứng vs Mềm</div>', unsafe_allow_html=True)
         # Chuẩn hóa tên loại bìa cho gọn
         df['cover_clean'] = df['cover_type'].astype(str).str.lower()
         def clean_cover(c):
@@ -124,35 +158,104 @@ def render_tab3(df):
     row2_col1, row2_col2 = st.columns(2)
 
     with row2_col1:
-        st.subheader("Tương quan Hình ảnh và Doanh số theo Loại người bán")
+        st.markdown('<div class="custom-subheader">Ngưỡng Bão hòa Hình ảnh Sản phẩm</div>', unsafe_allow_html=True)
         
-        # 1. Nhóm số lượng ảnh 
-        bins = [0, 1, 3, 5, 100]
-        labels = ['1 ảnh', '2-3 ảnh', '4-5 ảnh', '6+ ảnh']
-        df['image_grp'] = pd.cut(df['image_count'], bins=bins, labels=labels)
+        # ====== CONTOUR DENSITY PLOT (2D KDE) ======
+        import plotly.graph_objects as go
+        from scipy.stats import gaussian_kde
         
-        # 2. Tạo bảng phân tích chéo, tính trung vị doanh số
-        heatmap_data = df.pivot_table(
-            index='seller_type', 
-            columns='image_grp', 
-            values='quantity_sold', 
-            aggfunc='median'
-        ).fillna(0)
+        # Lọc dữ liệu hợp lệ
+        df_contour = df.dropna(subset=['image_count', 'quantity_sold']).copy()
+        df_contour = df_contour[(df_contour['quantity_sold'] > 0) & (df_contour['image_count'] > 0)]
         
-        # 3. Vẽ Heatmap bằng Plotly
-        fig = px.imshow(
-            heatmap_data,
-            text_auto=True,
-            aspect="auto",
-            color_continuous_scale='Viridis',
-            labels=dict(x="Số lượng ảnh", y="Loại người bán", color="Doanh số trung vị")
-        )
+        # Log-transform doanh số (phân bố lệch phải mạnh)
+        df_contour['log_sales'] = np.log1p(df_contour['quantity_sold'])
         
-        st.plotly_chart(fig, use_container_width=True)
-        st.caption("Heatmap: Việc đầu tư nhiều hình ảnh có mang lại hiệu ứng tăng doanh số đồng đều giữa Tiki Trading và Merchant không?")
+        x_data = df_contour['image_count'].values
+        y_data = df_contour['log_sales'].values
+        
+        # Tính 2D KDE
+        try:
+            xy = np.vstack([x_data, y_data])
+            kde = gaussian_kde(xy, bw_method=0.3)
+            
+            # Tạo lưới điểm
+            x_grid = np.linspace(x_data.min(), min(x_data.max(), 20), 80)
+            y_grid = np.linspace(y_data.min(), y_data.max(), 80)
+            X, Y = np.meshgrid(x_grid, y_grid)
+            positions = np.vstack([X.ravel(), Y.ravel()])
+            Z = np.reshape(kde(positions), X.shape)
+            
+            fig11 = go.Figure()
+            
+            # Contour heatmap (filled)
+            fig11.add_trace(go.Contour(
+                x=x_grid,
+                y=y_grid,
+                z=Z,
+                colorscale='Viridis',
+                contours=dict(
+                    showlabels=False,
+                    coloring='heatmap'
+                ),
+                colorbar=dict(
+                    title='Mật độ',
+                    titleside='right',
+                    titlefont=dict(size=11)
+                ),
+                hovertemplate='Số ảnh: %{x:.0f}<br>Log Doanh số: %{y:.2f}<br>Mật độ: %{z:.4f}<extra></extra>'
+            ))
+            
+            # Thêm đường xu hướng trung vị theo số lượng ảnh
+            trend_data = df_contour.groupby('image_count')['log_sales'].median().reset_index()
+            trend_data = trend_data[trend_data['image_count'] <= 20]  # Giới hạn để dễ nhìn
+            
+            fig11.add_trace(go.Scatter(
+                x=trend_data['image_count'],
+                y=trend_data['log_sales'],
+                mode='lines+markers',
+                line=dict(color='#FF4444', width=3, dash='dot'),
+                marker=dict(size=7, color='#FF4444', line=dict(width=1.5, color='white')),
+                name='Trung vị Doanh số',
+                hovertemplate='Số ảnh: %{x:.0f}<br>Doanh số trung vị: %{customdata:.0f}<extra>Trung vị</extra>',
+                customdata=np.expm1(trend_data['log_sales'])
+            ))
+            
+            # Chuyển trục y từ log về giá trị thực
+            tick_vals_real = [10, 50, 100, 500, 1000, 5000]
+            tick_vals_log = [np.log1p(v) for v in tick_vals_real]
+            tick_labels = [str(v) for v in tick_vals_real]
+            
+            fig11.update_layout(
+                xaxis=dict(
+                    title='Số lượng Hình ảnh (Image Count)',
+                    showgrid=False,
+                    dtick=2
+                ),
+                yaxis=dict(
+                    title='Doanh số bán (Quantity Sold)',
+                    tickvals=tick_vals_log,
+                    ticktext=tick_labels,
+                    showgrid=False
+                ),
+                margin=dict(t=10, l=10, r=10, b=10),
+                legend=dict(
+                    yanchor="top", y=0.99, xanchor="right", x=0.99,
+                    bgcolor='rgba(255,255,255,0.85)',
+                    bordercolor='#E5E7EB',
+                    borderwidth=1
+                ),
+                height=420
+            )
+            
+            st.plotly_chart(fig11, use_container_width=True)
+        except Exception:
+            st.info("Không đủ dữ liệu để vẽ Contour Plot.")
+        
+        st.caption("Contour Density Plot: Vùng sáng (vàng) là nơi tập trung nhiều sản phẩm nhất. Đường đỏ đứt nét chỉ ra trung vị doanh số — khi đường này bắt đầu phẳng, đó là ngưỡng bão hòa hình ảnh.")
 
     with row2_col2:
-        st.subheader("Trí tuệ Nhân tạo: Yếu tố Quyết định Doanh số")
+        st.markdown('<div class="custom-subheader">Trí tuệ Nhân tạo: Yếu tố Quyết định Doanh số</div>', unsafe_allow_html=True)
         # Chạy hàm ML đã build sẵn
         fi_df = get_feature_importance(df)
         
