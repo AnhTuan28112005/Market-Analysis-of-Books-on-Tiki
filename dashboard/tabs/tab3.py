@@ -35,8 +35,42 @@ def get_feature_importance(df):
     return fi
 
 def render_tab3(df):
-    st.markdown("## 📚 Đặc điểm Sản phẩm & Hệ sinh thái Người bán")
-    st.markdown("*Phân tích đặc điểm vật lý (Bìa, Hình ảnh chất lượng) cùng cuộc chiến giữa đại lý chính hãng (Tiki Trading) và nhà bán hàng bên thứ 3 (Merchant).*")
+    # Custom styled header
+    st.markdown("""
+    <style>
+        .custom-header {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0066FF;
+            padding: 10px 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 102, 255, 0.15);
+        }
+        .custom-subheader {
+            font-size: 1.8rem;
+            font-weight: 750;
+            color: #00A699;
+            margin: 28px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #00A699;
+            display: inline-block;
+            letter-spacing: -0.3px;
+        }
+        .kpi-description {
+            font-size: 1.05rem;
+            color: #555555;
+            font-style: italic;
+            margin: 8px 0 20px 0;
+            line-height: 1.6;
+            letter-spacing: -0.2px;
+        }
+    </style>
+    <div class="custom-header">📚 Đặc điểm Sản phẩm & Hệ sinh thái Người bán</div>
+    <div class="kpi-description">
+    🏢 Phân tích đặc điểm vật lý (Bìa, Hình ảnh chất lượng) cùng cuộc chiến giữa đại lý chính hãng (Tiki Trading) và nhà bán hàng bên thứ 3 (Merchant).
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
 
@@ -46,7 +80,7 @@ def render_tab3(df):
     row1_col1, row1_col2 = st.columns(2)
 
     with row1_col1:
-        st.subheader("Sức mạnh: Tiki Trading vs Merchant")
+        st.markdown('<div class="custom-subheader">Sức mạnh: Tiki Trading vs Merchant</div>', unsafe_allow_html=True)
         # Phân loại seller
         df['seller_group'] = df['seller_name'].apply(lambda x: 'Tiki Trading' if str(x).strip().lower() == 'tiki trading' else 'Merchant')
         
@@ -91,7 +125,7 @@ def render_tab3(df):
         st.caption("Biểu đồ Mạng nhện (Radar Chart): Trực quan hóa 5 'Hệ số sức mạnh' từ trung bình thang 100. Chứng minh liệu Tiki Trading có thực sự áo đảo dân thường ở mọi mặt trận?")
 
     with row1_col2:
-        st.subheader("Thị hiếu Bìa Sách: Cứng vs Mềm")
+        st.markdown('<div class="custom-subheader">Thị hiếu Bìa Sách: Cứng vs Mềm</div>', unsafe_allow_html=True)
         # Chuẩn hóa tên loại bìa cho gọn
         df['cover_clean'] = df['cover_type'].astype(str).str.lower()
         def clean_cover(c):
@@ -124,7 +158,7 @@ def render_tab3(df):
     row2_col1, row2_col2 = st.columns(2)
 
     with row2_col1:
-        st.subheader("Giá trị của việc đầu tư Hình ảnh")
+        st.markdown('<div class="custom-subheader">Giá trị của việc đầu tư Hình ảnh</div>', unsafe_allow_html=True)
         
         # 1. Gom nhóm (Binning) lượng hình ảnh thành các bậc trải nghiệm
         def group_image(x):
@@ -164,7 +198,7 @@ def render_tab3(df):
         st.caption("Biểu đồ Cột (Binning): Trả lời chính xác câu hỏi 'Nếu tôi bổ sung thêm hình ảnh, doanh số chốt đơn sẽ tăng trưởng bao nhiêu %?'")
 
     with row2_col2:
-        st.subheader("Trí tuệ Nhân tạo: Yếu tố Quyết định Doanh số")
+        st.markdown('<div class="custom-subheader">Trí tuệ Nhân tạo: Yếu tố Quyết định Doanh số</div>', unsafe_allow_html=True)
         # Chạy hàm ML đã build sẵn
         fi_df = get_feature_importance(df)
         

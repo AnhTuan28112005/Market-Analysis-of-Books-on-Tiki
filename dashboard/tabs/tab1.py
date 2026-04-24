@@ -4,8 +4,42 @@ import pandas as pd
 import numpy as np
 
 def render_tab1(df):
-    st.markdown("## 🏠 Tổng quan Thị trường & Cấu trúc Ngành hàng")
-    st.markdown("*Cái nhìn vĩ mô về quy mô thị trường, sự phân bổ các thể loại và uy tín của các 'ông lớn' (Nhà xuất bản).*")
+    # Custom styled header
+    st.markdown("""
+    <style>
+        .custom-header {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0066FF;
+            padding: 10px 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 102, 255, 0.15);
+        }
+        .custom-subheader {
+            font-size: 1.8rem;
+            font-weight: 750;
+            color: #00A699;
+            margin: 28px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #00A699;
+            display: inline-block;
+            letter-spacing: -0.3px;
+        }
+        .kpi-description {
+            font-size: 1.05rem;
+            color: #555555;
+            font-style: italic;
+            margin: 8px 0 20px 0;
+            line-height: 1.6;
+            letter-spacing: -0.2px;
+        }
+    </style>
+    <div class="custom-header">🏠 Tổng quan Thị trường & Cấu trúc Ngành hàng</div>
+    <div class="kpi-description">
+    📊 Cái nhìn vĩ mô về quy mô thị trường, sự phân bổ các thể loại và uy tín của các 'ông lớn' (Nhà xuất bản).
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
 
@@ -31,7 +65,7 @@ def render_tab1(df):
 
     with row1_col1:
         # Biểu đồ 1: Treemap Thị phần doanh số
-        st.subheader("Thị phần Doanh số theo Thể loại")
+        st.markdown('<div class="custom-subheader">Thị phần Doanh số theo Thể loại</div>', unsafe_allow_html=True)
         df_treemap = df.groupby('crawl_category')['quantity_sold'].sum().reset_index()
         fig1 = px.treemap(
             df_treemap, 
@@ -46,7 +80,7 @@ def render_tab1(df):
 
     with row1_col2:
         # Biểu đồ 2: Boxplot Phân phối giá
-        st.subheader("Phân phối Giá theo Danh mục")
+        st.markdown('<div class="custom-subheader">Phân phối Giá theo Danh mục</div>', unsafe_allow_html=True)
         # Lọc bớt sách vượt quá 1 triệu để boxplot dễ nhìn hơn (có thể điều chỉnh)
         df_box = df[df['price'] <= 1_000_000]
         fig2 = px.box(
@@ -69,7 +103,7 @@ def render_tab1(df):
 
     with row2_col1:
         # Biểu đồ 3: Top 10 NXB theo chỉ số tổng hợp
-        st.subheader("Top 10 NXB Uy tín nhất")
+        st.markdown('<div class="custom-subheader">Top 10 NXB Uy tín nhất</div>', unsafe_allow_html=True)
         # Xử lý tính toán Publisher Score
         df_nxb = df.dropna(subset=['publisher_name'])
         pub_stats = df_nxb.groupby('publisher_name').agg({
@@ -108,7 +142,7 @@ def render_tab1(df):
 
     with row2_col2:
         # Biểu đồ 4: Donut Chart Ngôn ngữ
-        st.subheader("Sách Tiếng Anh vs Tiếng Việt")
+        st.markdown('<div class="custom-subheader">Sách Tiếng Anh vs Tiếng Việt</div>', unsafe_allow_html=True)
         # Điền missing = Vietnamese nếu cột bị null
         df['book_language'] = df['book_language'].fillna('Vietnamese')
         df_lang = df.groupby('book_language')['product_id'].count().reset_index()
