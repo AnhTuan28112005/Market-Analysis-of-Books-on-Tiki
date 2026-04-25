@@ -38,14 +38,20 @@ def render_tab4(df):
             text-shadow: 0 2px 4px rgba(0, 114, 178, 0.15);
         }
         .cb-subheader {
-            font-size: 1.8rem;
-            font-weight: 750;
-            color: #009E73;
-            margin: 28px 0 12px 0;
-            padding-bottom: 8px;
-            border-bottom: 3px solid #009E73;
-            display: inline-block;
-            letter-spacing: -0.3px;
+            font-size: 1.8rem !important;
+            font-weight: 750 !important;
+            color: #009E73 !important;
+            margin: 28px auto 12px auto !important;
+            padding: 12px 16px !important;
+            padding-bottom: 8px !important;
+            border-bottom: 3px solid #009E73 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: fit-content !important;
+            max-width: 90% !important;
+            letter-spacing: -0.3px !important;
+            text-align: center !important;
         }
         .cb-description {
             font-size: 1.05rem;

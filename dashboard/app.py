@@ -54,10 +54,11 @@ st.markdown("""
         font-size: 2.8rem;
         font-weight: 700;
         margin: 30px 0 45px 0;
-        padding: 20px;
+        padding: 24px 20px;
         color: #0066FF;
         letter-spacing: -0.5px;
         animation: fadeInUp 0.4s ease-out;
+        line-height: 1.4;
     }
     
     .title-center::before {
@@ -81,7 +82,7 @@ st.markdown("""
     button[data-baseweb="tab"] {
         flex: 1 !important;
         text-align: center !important;
-        font-size: 15px !important;
+        font-size: 18px !important;
         font-weight: 700 !important;
         padding: 14px 18px !important;
         border-radius: 10px !important;
@@ -92,6 +93,17 @@ st.markdown("""
         margin: 0 6px !important;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
         letter-spacing: -0.3px !important;
+        line-height: 1.4 !important;
+    }
+    
+    /* Target tất cả text elements bên trong tab button */
+    button[data-baseweb="tab"] *,
+    button[data-baseweb="tab"] span,
+    button[data-baseweb="tab"] div {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        line-height: 1.4 !important;
+    }
     }
     
     /* Hover effect cho tab */
@@ -122,19 +134,25 @@ st.markdown("""
     h2 {
         font-size: 2.2rem !important;
         margin-top: 35px !important;
-        margin-bottom: 12px !important;
+        margin-bottom: 16px !important;
         color: #0066FF !important;
         font-weight: 800 !important;
         letter-spacing: -0.5px !important;
         text-shadow: 0 2px 4px rgba(0, 102, 255, 0.15) !important;
+        padding: 16px 12px !important;
+        line-height: 1.5 !important;
     }
     
     h3 {
         font-size: 1.5rem !important;
         color: #00A699 !important;
-        margin-top: 25px !important;
+        margin-top: 30px !important;
+        margin-bottom: 20px !important;
         font-weight: 700 !important;
         letter-spacing: -0.3px !important;
+        padding: 12px 16px !important;
+        line-height: 1.6 !important;
+        text-shadow: 0 1px 3px rgba(0, 166, 153, 0.12) !important;
     }
     
     /* Căn giữa văn bản diễn giải in nghiêng dưới H2 */
