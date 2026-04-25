@@ -4,8 +4,48 @@ import pandas as pd
 import numpy as np
 
 def render_tab1(df):
-    st.markdown("## 🏠 Tổng quan Thị trường & Cấu trúc Ngành hàng")
-    st.markdown("*Cái nhìn vĩ mô về quy mô thị trường, sự phân bổ các thể loại và uy tín của các 'ông lớn' (Nhà xuất bản).*")
+    # Custom styled header
+    st.markdown("""
+    <style>
+        .custom-header {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0066FF;
+            padding: 10px 0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 102, 255, 0.15);
+        }
+        .custom-subheader {
+            font-size: 1.8rem !important;
+            font-weight: 750 !important;
+            color: #00A699 !important;
+            margin: 28px auto 12px auto !important;
+            padding: 12px 16px !important;
+            padding-bottom: 8px !important;
+            border-bottom: 3px solid #00A699 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: fit-content !important;
+            max-width: 90% !important;
+            letter-spacing: -0.3px !important;
+            text-align: center !important;
+        }
+        .kpi-description {
+            font-size: 1.05rem;
+            color: #555555;
+            font-style: italic;
+            margin: 8px 0 20px 0;
+            line-height: 1.6;
+            letter-spacing: -0.2px;
+        }
+    </style>
+    <div class="custom-header">🏠 Tổng quan Thị trường & Cấu trúc Ngành hàng</div>
+    <div class="kpi-description">
+    📊 Cái nhìn vĩ mô về quy mô thị trường, sự phân bổ các thể loại và uy tín của các 'ông lớn' (Nhà xuất bản).
+    </div>
+    """, unsafe_allow_html=True)
     
     st.divider()
 
@@ -31,7 +71,7 @@ def render_tab1(df):
 
     with row1_col1:
         # Biểu đồ 1: Treemap Thị phần doanh số
-        st.subheader("Thị phần Doanh số theo Thể loại")
+        st.markdown('<div class="custom-subheader">Thị phần Doanh số theo Thể loại</div>', unsafe_allow_html=True)
         df_treemap = df.groupby('crawl_category')['quantity_sold'].sum().reset_index()
         fig1 = px.treemap(
             df_treemap, 
@@ -46,34 +86,19 @@ def render_tab1(df):
 
     with row1_col2:
         # Biểu đồ 2: Boxplot Phân phối giá
-        st.subheader("Phân phối Giá theo Danh mục")
+        st.markdown('<div class="custom-subheader">Phân phối Giá theo Danh mục</div>', unsafe_allow_html=True)
         # Lọc bớt sách vượt quá 1 triệu để boxplot dễ nhìn hơn (có thể điều chỉnh)
-        df_box = df[df['price'] <= 1_000_000].copy()
-
-        # Gom các danh mục English nhỏ vào nhóm chung để biểu đồ rõ ràng hơn
-        df_box['category_display'] = df_box['crawl_category'].replace({
-            "English - Children's Books": 'Sách Tiếng Anh',
-            'English - Fiction': 'Sách Tiếng Anh'
-        })
-
-        # Chỉ hiển thị các danh mục có đủ dữ liệu để tránh bảng quá dày
-        top_categories = df_box['category_display'].value_counts().nlargest(6).index
-        df_box = df_box[df_box['category_display'].isin(top_categories)]
-
-        # Sắp xếp danh mục theo giá trung vị để dễ so sánh
-        category_order = df_box.groupby('category_display')['price'].median().sort_values().index
-
+        df_box = df[df['price'] <= 1_000_000]
         fig2 = px.box(
-            df_box,
-            x='price',
-            y='category_display',
-            color='category_display',
-            category_orders={'category_display': category_order},
-            labels={'price': 'Giá bán (VNĐ)', 'category_display': 'Thể loại'}
+            df_box, 
+            x='price', 
+            y='crawl_category', 
+            color='crawl_category',
+            labels={'price': 'Giá bán (VNĐ)', 'crawl_category': 'Thể loại'}
         )
         fig2.update_layout(showlegend=False, xaxis_title="Giá bán (VNĐ)", yaxis_title="")
         st.plotly_chart(fig2, use_container_width=True)
-        st.caption("Boxplot thể hiện phân phối giá theo nhóm danh mục chính. Các nhóm English nhỏ được gom chung để biểu đồ dễ đọc hơn.")
+        st.caption("Boxplot thể hiện khoảng giá phổ biến (IQR) và các đầu sách ngoại lai (điểm chấm) giá cao.")
 
     st.markdown("---")
 
@@ -84,7 +109,22 @@ def render_tab1(df):
 
     with row2_col1:
         # Biểu đồ 3: Top 10 NXB theo chỉ số tổng hợp
-        st.subheader("Top 10 NXB Uy tín nhất")
+        st.markdown("""
+        <style>
+            .chart-header {
+                text-align: center;
+                font-size: 1.8rem;
+                font-weight: 750;
+                color: #00A699;
+                margin-bottom: -40px;
+                border-bottom: 3px solid #00A699;
+                padding-bottom: 8px;
+                position: relative;
+                z-index: 10;
+            }
+        </style>
+        <div class="chart-header">Top 10 NXB Uy tín nhất</div>
+        """, unsafe_allow_html=True)
         # Xử lý tính toán Publisher Score
         df_nxb = df.dropna(subset=['publisher_name'])
         pub_stats = df_nxb.groupby('publisher_name').agg({
@@ -117,13 +157,35 @@ def render_tab1(df):
             color_continuous_scale='Viridis' # Chuẩn Accessibility Tab 4 sau này
         )
         fig3.update_traces(textposition='outside')
-        fig3.update_layout(yaxis_title="", margin=dict(l=0, r=0, t=0, b=0), coloraxis_showscale=False)
+        fig3.update_layout(
+            yaxis_title="", 
+            margin=dict(l=70, r=60, t=50, b=0), 
+            coloraxis_showscale=False,
+            yaxis=dict(tickfont=dict(size=8)),
+            height=350,
+            xaxis=dict(tickfont=dict(size=8))
+        )
         st.plotly_chart(fig3, use_container_width=True)
         st.caption("Điểm uy tín kết hợp: Điểm đánh giá (Rating) + Số lượng chia sẻ (Review) + Doanh số đạt được.")
 
     with row2_col2:
         # Biểu đồ 4: Donut Chart Ngôn ngữ
-        st.subheader("Sách Tiếng Anh vs Tiếng Việt")
+        st.markdown("""
+        <style>
+            .donut-header {
+                text-align: center;
+                font-size: 1.8rem;
+                font-weight: 750;
+                color: #00A699;
+                margin-bottom: -40px;
+                border-bottom: 3px solid #00A699;
+                padding-bottom: 8px;
+                position: relative;
+                z-index: 10;
+            }
+        </style>
+        <div class="donut-header">Sách Tiếng Anh vs Tiếng Việt</div>
+        """, unsafe_allow_html=True)
         # Điền missing = Vietnamese nếu cột bị null
         df['book_language'] = df['book_language'].fillna('Vietnamese')
         df_lang = df.groupby('book_language')['product_id'].count().reset_index()
@@ -138,8 +200,8 @@ def render_tab1(df):
             color_discrete_map={'Vietnamese': '#1f77b4', 'English': '#ff7f0e'}
         )
         # Thiết kế cho chuẩn Donut chart đẹp mắt
-        fig4.update_traces(textposition='inside', textinfo='percent+label')
-        fig4.update_layout(showlegend=False, margin=dict(t=0, b=0, l=0, r=0))
+        fig4.update_traces(textposition='inside', textinfo='percent')
+        fig4.update_layout(showlegend=True, margin=dict(t=50, b=0, l=0, r=0), height=400)
         st.plotly_chart(fig4, use_container_width=True)
         st.caption("Donut Chart trực quan sự chênh lệch thị phần lượng số sách ngoại văn so với sách nội.")
 
