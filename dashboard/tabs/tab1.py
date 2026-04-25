@@ -164,7 +164,19 @@ def render_tab1(df):
         )
         # Thiết kế cho chuẩn Donut chart đẹp mắt
         fig4.update_traces(textposition='inside', textinfo='percent+label')
-        fig4.update_layout(showlegend=False, margin=dict(t=0, b=0, l=0, r=0))
+        fig4.update_layout(
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.15,
+                xanchor="center",
+                x=0.5,
+                font=dict(size=13)
+            ),
+            margin=dict(t=0, b=30, l=0, r=0),
+            height=400
+        )
         st.plotly_chart(fig4, use_container_width=True)
         st.caption("Donut Chart trực quan sự chênh lệch thị phần lượng số sách ngoại văn so với sách nội.")
 
