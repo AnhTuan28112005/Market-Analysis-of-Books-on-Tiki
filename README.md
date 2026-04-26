@@ -27,7 +27,7 @@ lab1/
 │   ├── app.py  
 │   └── tabs/          
 ├── requirements.txt
-├── Group 15.pdf
+├──Group15.pdf
 └── README.md
 ```
 
