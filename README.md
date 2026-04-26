@@ -20,11 +20,12 @@ lab1/
 │   ├── raw/                    # Dữ liệu thô sau crawl
 │   └── processed/              # Dữ liệu đã làm sạch
 ├── notebooks/
-│   ├── 01_crawl_data.ipynb     # Thu thập dữ liệu từ Tiki API
-│   ├── 02_preprocessing.ipynb  # Tiền xử lý & Feature Engineering
-│   └── 03_eda.ipynb            # EDA & Trực quan hóa
+│   ├── 01_crawl_data.py    # Thu thập dữ liệu từ Tiki API
+│   ├── EDA_Preprocessed.ipynb  # Tiền xử lý & Feature 
+│       
 ├── dashboard/
-│   └── app.py                  # Streamlit Dashboard (3 tab)
+│   ├── app.py  
+│   └── tabs/          
 ├── requirements.txt
 └── README.md
 ```
@@ -43,22 +44,16 @@ pip install -r requirements.txt
 
 Mở và chạy toàn bộ cells trong:
 ```
-notebooks/01_crawl_data.ipynb
+notebooks/01_crawl_data.py
 ```
 
-### 3. Tiền xử lý dữ liệu
+### 3. EDA + Tiền xử lý dữ liệu
 
 ```
-notebooks/02_preprocessing.ipynb
+notebooks/EDA_Preprocessed.ipynb
 ```
 
-### 4. Phân tích EDA
-
-```
-notebooks/03_eda.ipynb
-```
-
-### 5. Chạy Dashboard
+### 4. Chạy Dashboard
 
 ```bash
 streamlit run dashboard/app.py
